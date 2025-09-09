@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Barang</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="fw-bold">
+        📦 Inventory Barang
+      </h2>
+      <input type="text" id="searchInput" class="form-control w-25" placeholder="Cari barang...">
+    </div>
+
+    <!-- Tombol Tambah -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#tambahModal">+ Tambah Barang</button>
+
+    <!-- Tabel -->
+    <table class="table table-bordered table-striped align-middle text-center" id="inventoryTable">
+      <thead class="table-dark">
+        <tr>
+          <th>Kode</th>
+          <th>Nama</th>
+          <th>Stock</th>
+          <th>Supplier</th>
+          <th>Foto</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.kode }}</td>
+          <td>{{ item.nama }}</td>
+          <td>{{ item.stock }}</td>
+          <td>{{ item.supplier }}</td>
+          <td>
+            {% if item.foto %}
+              <img src="{{ url_for('static', filename='uploads/' ~ item.foto) }}" alt="Foto" width="50" data-bs-toggle="modal" data-bs-target="#fotoModal{{ item.id }}" style="cursor:pointer;">
+              
+              <!-- Modal Preview Foto -->
+              <div class="modal fade" id="fotoModal{{ item.id }}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-body text-center">
+                      <img src="{{ url_for('static', filename='uploads/' ~ item.foto) }}" class="img-fluid rounded">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              Tidak ada foto
+            {% endif %}
+          </td>
+          <td>
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ item.id }}">Edit</button>
+            <a href="/delete/{{ item.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus barang ini?')">Delete</a>
+          </td>
+        </tr>
+
+        <!-- Modal Edit -->
+        <div class="modal fade" id="editModal{{ item.id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Barang</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <form action="/edit/{{ item.id }}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Kode</label>
+                    <input type="text" name="kode" class="form-control" value="{{ item.kode }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Nama</label>
+                    <input type="text" name="nama" class="form-control" value="{{ item.nama }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Stock</label>
+                    <input type="number" name="stock" class="form-control" value="{{ item.stock }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Supplier</label>
+                    <input type="text" name="supplier" class="form-control" value="{{ item.supplier }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Foto</label><br>
+                    {% if item.foto %}
+                      <img src="{{ url_for('static', filename='uploads/' ~ item.foto) }}" alt="Foto" width="80" class="mb-2">
+                    {% endif %}
+                    <input type="file" name="foto" class="form-control">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Tambah -->
+  <div class="modal fade" id="tambahModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Tambah Barang</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form action="/tambah" method="POST" enctype="multipart/form-data">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Kode</label>
+              <input type="text" name="kode" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nama</label>
+              <input type="text" name="nama" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Stock</label>
+              <input type="number" name="stock" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Supplier</label>
+              <input type="text" name="supplier" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Foto</label>
+              <input type="file" name="foto" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Tambah</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script pencarian & sorting -->
+  <script>
+    // Pencarian
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+      let filter = this.value.toLowerCase();
+      let rows = document.querySelectorAll("#inventoryTable tbody tr");
+      rows.forEach(row => {
+        let text = row.innerText.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
+    });
+
+    // Urut tabel berdasarkan Nama (kolom ke-2)
+    function sortTableByName() {
+      let table = document.getElementById("inventoryTable").tBodies[0];
+      let rows = Array.from(table.rows);
+
+      rows.sort((a, b) => {
+        let nameA = a.cells[1].innerText.toLowerCase();
+        let nameB = b.cells[1].innerText.toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
+      rows.forEach(row => table.appendChild(row));
+    }
+
+    window.onload = sortTableByName;
+  </script>
+
+</body>
+</html>
